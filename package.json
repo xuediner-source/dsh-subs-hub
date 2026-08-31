@@ -1,0 +1,49 @@
+{
+  "name": "dsh-subs-hub",
+  "version": "0.1.0",
+  "description": "DSH subscription hub: Gemini / GPT / Grok / Claude without API keys.",
+  "type": "module",
+  "main": "lib/index.js",
+  "files": [
+    "lib",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-connection",
+        "@deepseek-ai/dsh-client-ui-settings"
+      ]
+    }
+  },
+  "keywords": [
+    "dsh",
+    "gemini",
+    "gpt",
+    "grok",
+    "claude",
+    "oauth",
+    "subscription"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xuediner-source/dsh-subs-hub.git"
+  },
+  "bugs": {
+    "url": "https://github.com/xuediner-source/dsh-subs-hub/issues"
+  },
+  "homepage": "https://github.com/xuediner-source/dsh-subs-hub#readme"
+}
