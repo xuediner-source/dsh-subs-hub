@@ -1,11 +1,12 @@
 {
   "name": "dsh-subs-hub",
-  "version": "0.1.0",
-  "description": "DSH subscription hub: Gemini / GPT / Grok / Claude without API keys.",
+  "version": "0.1.2",
+  "description": "DSH subscription hub: Gemini / GPT / Grok / Claude / Qwen / OpenRouter without API keys.",
   "type": "module",
   "main": "lib/index.js",
   "files": [
     "lib",
+    "docs",
     "cordis.patch.yml",
     "README.md",
     "LICENSE"
@@ -14,6 +15,10 @@
     ".": "./lib/index.js",
     "./client": "./lib/client.js",
     "./package.json": "./package.json"
+  },
+  "scripts": {
+    "check": "node --check lib/index.js && node --check lib/client.js",
+    "test": "node test/run-all.mjs"
   },
   "dsh": {
     "bundle": {
@@ -34,6 +39,8 @@
     "gpt",
     "grok",
     "claude",
+    "qwen",
+    "openrouter",
     "oauth",
     "subscription"
   ],
