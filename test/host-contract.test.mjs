@@ -27,22 +27,38 @@ test('dsh-llm imports only names the current host actually exports', () => {
   assert.match(importLine, /ToolCallId/, 'expected the current export name');
 });
 
-test('the /subscriptions-auth channel injects webServer', () => {
-  // dsh-client-connection mounts an RPC channel as a webserver route through
-  // the CALLING context (owner.webServer.register). Without webServer in this
-  // context, rpc.handle() throws, the route never registers, the request falls
-  // through to the frontend-static fallback, and the browser sees
+test('the /subscriptions-auth channel does not mount through connection.rpc.handle', () => {
+  // dsh-client-connection's register() reads `owner.webServer`, where `owner`
+  // is the CONNECTION plugin's own context. Cordis resolves an undeclared
+  // service by walking THAT context's fiber chain, so it never reaches the
+  // calling plugin's context: connection injects only "credentials", the
+  // lookup throws, the route never registers, and the request falls through to
+  // the frontend-static fallback — the browser sees
   // "transport failure for /subscriptions-auth/status: HTTP 405".
+  //
+  // The channel must therefore register on the plugin's own webServer context,
+  // the way @linxin666/dsh-usage and dsh-usage-board do.
   const at = source.indexOf('function registerAuthRpc(');
   assert.ok(at !== -1, 'expected registerAuthRpc');
-  const body = source.slice(at, source.indexOf('\n}', at));
-  assert.match(body, /ctx\.inject\(\[[^\]]*"connection"[^\]]*"webServer"/, 'must inject webServer alongside connection');
-  assert.match(body, /rpc\.handle\(SUBSCRIPTIONS_AUTH_CHANNEL/, 'expected the channel registration');
+  let depth = 0;
+  let i = source.indexOf('{', at);
+  for (; i < source.length; i += 1) {
+    if (source[i] === '{') depth += 1;
+    else if (source[i] === '}') {
+      depth -= 1;
+      if (depth === 0) break;
+    }
+  }
+  const body = source.slice(at, i + 1);
+  assert.ok(!body.includes('rpc.handle'), 'must not use connection.rpc.handle');
+  assert.match(body, /ctx\.inject\(\["webServer"\]/, 'must inject webServer on its own context');
+  assert.match(body, /webServer\.register\(/, 'must register the route on webServer');
 });
 
 test('webServer is scoped to the RPC channel, not the top-level inject list', () => {
   // Headless profiles have no webServer. Declaring it at the top level would
-  // stop the LLM adapters from loading there at all.
+  // stop the LLM adapters from loading there at all, so it stays scoped to the
+  // RPC channel registration.
   const injectLine = source.split('\n').find((l) => l.startsWith('const inject ='));
   assert.ok(injectLine, 'expected a top-level inject');
   assert.ok(!injectLine.includes('webServer'), 'webServer must not be a top-level dependency');
