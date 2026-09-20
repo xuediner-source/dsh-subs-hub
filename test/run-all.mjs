@@ -2,4 +2,5 @@
 import "./oauth-pkce.test.mjs";
 import "./proxy-fallback.test.mjs";
 import "./store-atomic.test.mjs";
+import "./host-contract.test.mjs";
 import "./qwen-device-flow.test.mjs";
